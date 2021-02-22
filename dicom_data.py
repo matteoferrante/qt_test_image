@@ -11,6 +11,8 @@ MEDIAN = SAGITTAL = 2
 ALLOWED_PLANES = (AXIAL, CORONAL, SAGITTAL)
 
 
+"""LEGGE I DICOM E MAPPA LE MATRICI IN VALORI VISUALIZZABILI DA QT"""
+
 
 class DicomData:
     ALLOWED_MODALITIES = ('CT', 'MR', 'CR', 'RT')
@@ -22,11 +24,12 @@ class DicomData:
     @classmethod
     def from_files(cls, files: List[str]) -> "DicomData":
         data = []
+        mA=[]
         modality = None
         for file_path in files:
             f = pydicom.read_file(file_path)
             #print(f"Reading {file_path}...")
-
+            mA.append(float(f.XRayTubeCurrent))
             # Get modality
             if modality:
                 if modality != f.Modality:
@@ -37,7 +40,8 @@ class DicomData:
                 modality = f.Modality
             data.append(cls._read_pixel_data(f))
         #print(f"SHAPE: {np.array(data).shape}")
-        return cls(np.array(data), modality=modality)
+        dcm_header=pydicom.dcmread(files[0])
+        return cls(np.array(data), modality=modality),dcm_header,np.mean(mA)
 
     @classmethod
     def _read_pixel_data(cls, f) -> np.ndarray:
@@ -61,6 +65,7 @@ class DicomData:
             raise ValueError(f"Invalid plane identificator {plane} (allowed are 0, 1, 2)")
         index = [slice(None, None, None) for i in range(3)]
         index[plane] = n
+        print(index)
         return self._array[tuple(index)]
 
     def get_slice_shape(self, plane: str) -> Tuple[int, ...]:

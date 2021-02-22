@@ -4,7 +4,7 @@ from qtpy import QtWidgets, QtCore, QtGui
 
 from dicom_data import DicomData, AXIAL, ALLOWED_PLANES
 
-"""Questo importato da altro progetto ora vediamo come gira"""
+"""Classi per tenere traccia delle posizioni del mouse sulla finestra"""
 
 
 class TrackingLabel(QtWidgets.QLabel):
