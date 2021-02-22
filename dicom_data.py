@@ -65,7 +65,9 @@ class DicomData:
             raise ValueError(f"Invalid plane identificator {plane} (allowed are 0, 1, 2)")
         index = [slice(None, None, None) for i in range(3)]
         index[plane] = n
-        print(index)
+        #AGGIUNGERE CONTROLLO PER CRASH
+        if index[0]>self._array.shape[0]:
+            index[0]=0
         return self._array[tuple(index)]
 
     def get_slice_shape(self, plane: str) -> Tuple[int, ...]:

@@ -87,8 +87,22 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
 
         self.ui.setupUi(self)
-        self.ui.img = DicomWidget(self)
+        self.ui.img = DicomWidget(self) #lavorare qua per piazzarlo
         self.ui.pushButtonStart.clicked.connect(self.magic)
+
+
+        ## Set the imgs
+        pix_not = QPixmap(r'ui/img_not_sufficient.png').scaled(50,50)
+        self.ui.labelInsufficientImg.setPixmap(pix_not)
+
+        pix_low = QPixmap(r'ui/img_low.png').scaled(50,50)
+        self.ui.labelLowImg.setPixmap(pix_low)
+
+        pix_med = QPixmap(r'ui/img_medium.png').scaled(50, 50)
+        self.ui.labelMediumImg.setPixmap(pix_med)
+
+        pix_ok = QPixmap(r'ui/img_max.png').scaled(50, 50)
+        self.ui.labelMaxImg.setPixmap(pix_ok)
 
         self.info={}
         self.collected_data=[]
@@ -108,6 +122,7 @@ class MainWindow(QMainWindow):
 
         df=pd.DataFrame.from_dict(self.collected_data)
         df.to_csv("collected_data.csv")
+        print(f"[INFO] Output saved to collected_data.csv")
         can_exit=True
         if can_exit:
             event.accept()  # let the window close
@@ -122,6 +137,7 @@ class MainWindow(QMainWindow):
         self.info["Physician"]=phys_name
         self.collected_data.append(self.info)
         self.progress+=1
+        self.ui.progressBar.setProperty("value", self.progress)
         self.magic()
 
 
@@ -225,8 +241,9 @@ class MainWindow(QMainWindow):
 app = QApplication(sys.argv)
 dark_palette = QDarkPalette()
 dark_palette.set_app(app)
+
 window = MainWindow()
-window.show()
+window.showMaximized()
 
 
 

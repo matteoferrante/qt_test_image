@@ -14,7 +14,7 @@ class TrackingLabel(QtWidgets.QLabel):
         self.last_move_x = None
         self.last_move_y = None
         self.window = parent
-        self.setGeometry(QtCore.QRect(180, 100, 512, 512))
+        self.setGeometry(QtCore.QRect(400, 100, 1000, 1000)) #lavorare qua!
 
     def mouseLeaveEvent(self, event: QtGui.QMouseEvent):
         self.parent().mouse_x = -1
@@ -69,6 +69,7 @@ class DicomWidget(TrackingLabel):
 
         # Inner data
         self._zoom_level = kwargs.get("zoom_level", 0)
+        self._zoom_level=0.3
         self._data = kwargs.get("data", None)
         self._scaled_image = None
         self._low_hu = kwargs.get("low_hu", -1000)
