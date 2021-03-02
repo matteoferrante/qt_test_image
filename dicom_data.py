@@ -41,6 +41,7 @@ class DicomData:
             data.append(cls._read_pixel_data(f))
         #print(f"SHAPE: {np.array(data).shape}")
         dcm_header=pydicom.dcmread(files[0])
+
         return cls(np.array(data), modality=modality),dcm_header,np.mean(mA)
 
     @classmethod

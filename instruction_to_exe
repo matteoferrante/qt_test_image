@@ -1,0 +1,8 @@
+pyinstaller --onedir --windowed main.py
+
+#modify .spec file adding in datas the path and the names of imgs..
+
+a.datas += [('img_low.png','ui', "DATA")]
+a.datas += [('img_medium.png','ui', "DATA")]
+a.datas += [('img_max.png','ui', "DATA")]
+a.datas += [('img_not_sufficient.png','ui', "DATA")]

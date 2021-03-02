@@ -87,7 +87,7 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
 
         self.ui.setupUi(self)
-        self.ui.img = DicomWidget(self) #lavorare qua per piazzarlo
+        #self.ui.img = DicomWidget(self) #lavorare qua per piazzarlo
         self.ui.pushButtonStart.clicked.connect(self.magic)
 
 
@@ -107,7 +107,7 @@ class MainWindow(QMainWindow):
         self.info={}
         self.collected_data=[]
         self.progress=0   #actual img
-        self.target= 100  #img to evaluate
+        self.target= 20  #img to evaluate
         self.ui.pushButtonInsufficient.clicked.connect(lambda: self.vote(0))
         self.ui.pushButtonLow.clicked.connect(lambda: self.vote(1))
         self.ui.pushButtonMedium.clicked.connect(lambda: self.vote(2))
@@ -137,7 +137,7 @@ class MainWindow(QMainWindow):
         self.info["Physician"]=phys_name
         self.collected_data.append(self.info)
         self.progress+=1
-        self.ui.progressBar.setProperty("value", self.progress)
+        self.ui.progressBar.setProperty("value", self.progress*5)
         self.magic()
 
 
@@ -145,9 +145,11 @@ class MainWindow(QMainWindow):
     def update_coordinates(self):
         self.ui.img.update_image()
         #mostrare le info di visualizzazione
-        self.ui.infoLabel.setText(f"Width:\t {self.ui.img.window_width}\nCenter:\t {self.ui.img.window_center}")
-
-
+        try:
+            self.ui.infoLabel.setText(f"Series: {self.header.SeriesDescription} \nWidth:\t {self.ui.img.window_width}\nCenter:\t {self.ui.img.window_center}")
+        except Exception as e:
+            print(e)
+            self.ui.infoLabel.setText(f"Width:\t {self.ui.img.window_width}\nCenter:\t {self.ui.img.window_center}")
 
     def cv2QtImg(self,path):
         cv_img=cv2.imread(path)

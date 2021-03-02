@@ -14,14 +14,16 @@ class TrackingLabel(QtWidgets.QLabel):
         self.last_move_x = None
         self.last_move_y = None
         self.window = parent
-        self.setGeometry(QtCore.QRect(400, 100, 1000, 1000)) #lavorare qua!
+        #self.setGeometry(QtCore.QRect(400, 100, 1000, 1000)) #lavorare qua!
 
     def mouseLeaveEvent(self, event: QtGui.QMouseEvent):
+        print(f"[DEBUG] {self.parent()}")
         self.parent().mouse_x = -1
         self.parent().mouse_y = -1
         self.parent().update_coordinates()
 
     def mouseMoveEvent(self, event: QtGui.QMouseEvent):
+        print(f"[DEBUG] {self.parent()}")
         self.window.mouse_x = event.x()
         self.window.mouse_y = event.y()
         self.window.update_coordinates()
