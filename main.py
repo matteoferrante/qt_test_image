@@ -127,7 +127,7 @@ class MainWindow(QMainWindow):
         df=pd.DataFrame.from_dict(self.collected_data)
         phys_name = self.ui.plainTextPhysSign.toPlainText()
 
-        df.to_csv(os.path.join(r"S:\2- G_RAD - ALTRE CARTELLE\MDC",f"collected_data_{phys_name}.csv"))
+        df.to_csv(os.path.join(r"\\portale.ieo.it\portale\Aree_Dipartimentali\G_RAD\2- G_RAD - ALTRE CARTELLE\MDC",f"collected_data_{phys_name}.csv"))
         print(f"[INFO] Output saved to collected_data.csv")
         can_exit=True
         if can_exit:
