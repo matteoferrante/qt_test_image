@@ -78,8 +78,12 @@ class QDarkPalette(QPalette):
 #OVERALL VARIABLES
 
 
-NEW_DIR=r"D:\FISICA MEDICA\MezzoDiContrasto\Immagini TEST MDC\NEW"
-OLD_DIR=r"D:\FISICA MEDICA\MezzoDiContrasto\Immagini TEST MDC\OLD"
+#NEW_DIR=r"D:\FISICA MEDICA\MezzoDiContrasto\Immagini TEST MDC\NEW"
+#OLD_DIR=r"D:\FISICA MEDICA\MezzoDiContrasto\Immagini TEST MDC\OLD"
+
+NEW_DIR=rNEW_DIR=r"S:\2- G_RAD - ALTRE CARTELLE\MDC\NEW"
+
+OLD_DIR=r"S:\2- G_RAD - ALTRE CARTELLE\MDC\OLD"
 
 class MainWindow(QMainWindow):
     def __init__(self):
