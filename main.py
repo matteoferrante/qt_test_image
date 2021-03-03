@@ -81,9 +81,9 @@ class QDarkPalette(QPalette):
 #NEW_DIR=r"D:\FISICA MEDICA\MezzoDiContrasto\Immagini TEST MDC\NEW"
 #OLD_DIR=r"D:\FISICA MEDICA\MezzoDiContrasto\Immagini TEST MDC\OLD"
 
-NEW_DIR=rNEW_DIR=r"S:\2- G_RAD - ALTRE CARTELLE\MDC\NEW"
+NEW_DIR=rNEW_DIR=r"\\portale.ieo.it\portale\Aree_Dipartimentali\G_RAD\2- G_RAD - ALTRE CARTELLE\MDC\NEW"
 
-OLD_DIR=r"S:\2- G_RAD - ALTRE CARTELLE\MDC\OLD"
+OLD_DIR=r"\\portale.ieo.it\portale\Aree_Dipartimentali\G_RAD\2- G_RAD - ALTRE CARTELLE\MDC\OLD"
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -127,7 +127,7 @@ class MainWindow(QMainWindow):
         df=pd.DataFrame.from_dict(self.collected_data)
         phys_name = self.ui.plainTextPhysSign.toPlainText()
 
-        df.to_csv(os.path.join(f"collected_data_{phys_name}.csv"))
+        df.to_csv(os.path.join(r"S:\2- G_RAD - ALTRE CARTELLE\MDC",f"collected_data_{phys_name}.csv"))
         print(f"[INFO] Output saved to collected_data.csv")
         can_exit=True
         if can_exit:
