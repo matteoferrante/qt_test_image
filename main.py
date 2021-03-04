@@ -91,8 +91,15 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
 
         self.ui.setupUi(self)
+
+        self.info={}
+        self.collected_data=[]
+        self.progress=0   #actual img
+        self.target= 20  #img to evaluate
+
+
         #self.ui.img = DicomWidget(self) #lavorare qua per piazzarlo
-        self.ui.pushButtonStart.clicked.connect(self.magic)
+        self.ui.pushButtonStart.clicked.connect(lambda: self.load_at_start())
 
 
         ## Set the imgs
@@ -108,10 +115,7 @@ class MainWindow(QMainWindow):
         pix_ok = QPixmap(r'ui/img_max.png').scaled(50, 50)
         self.ui.labelMaxImg.setPixmap(pix_ok)
 
-        self.info={}
-        self.collected_data=[]
-        self.progress=0   #actual img
-        self.target= 20  #img to evaluate
+
         self.ui.pushButtonInsufficient.clicked.connect(lambda: self.vote(0))
         self.ui.pushButtonLow.clicked.connect(lambda: self.vote(1))
         self.ui.pushButtonMedium.clicked.connect(lambda: self.vote(2))
@@ -171,7 +175,46 @@ class MainWindow(QMainWindow):
     #LAVORARE QUA AGGIUNGERE MODIFICA CONTRASTO IMMAGINI E CARICARE DICOM
 
 
+    def load_at_start(self):
+        #load all target images
+        self.studies=[]
+        self.study_headers=[]
+        self.study_mean_MA=[]
+        for i in range(self.target):  #three images for security
+            print(f"[INFO] loading {i} of {self.target} images..")
+            self.ui.progressBar.setProperty("value", i* 5)
+            self._file_name = self.sample()
+            #     #list files
+            imgs = glob.glob(os.path.join(self._file_name, "*.dcm"))
+            #
+            try:
+                data, header, mean_mA = DicomData.from_files(imgs)
+                self.studies.append(data)
+                self.study_headers.append(header)
+                self.study_mean_MA.append(mean_mA)
+            except:
+                print("Could not load files")
+
+        self.ui.progressBar.setProperty("value", self.progress * 5)
+        self.magic()
+
+
     def magic(self):
+
+        self.header = self.study_headers[self.progress]
+        self.get_header_info(self.study_mean_MA[self.progress])
+        self.ui.img.data = self.studies[self.progress]
+        if self.progress == 0:  # if it's the first img set the width and the center to optimal values
+            self.ui.img.window_center = 40.
+            self.ui.img.window_width = 400.
+        self.setWindowTitle("IEO Dicom Viewer")
+        #self.file_list = imgs
+        self.ui.img.index = 0
+        self.ui.img.update_image()
+
+
+
+    def magic_old(self):
         self._file_name = self.sample()
         #     #list files
         imgs=glob.glob(os.path.join( self._file_name,"*.dcm"))
