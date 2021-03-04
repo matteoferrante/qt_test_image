@@ -6,7 +6,7 @@ from random import randint
 from PyQt5 import QtGui
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap, QCursor, QPalette, QColor
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QScrollArea
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QScrollArea, QMessageBox
 from PyQt5.uic.properties import QtCore, QtWidgets
 import cv2
 import numpy as np
@@ -196,21 +196,39 @@ class MainWindow(QMainWindow):
                 print("Could not load files")
 
         self.ui.progressBar.setProperty("value", self.progress * 5)
+        self.ui.pushButtonStart.setEnabled(False)
         self.magic()
+
+    def showdialog(self):
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Information)
+
+        msg.setText("Fine degli esami caricati")
+        msg.setInformativeText("Puoi chiudere questo box e il programma cliccando sulla X")
+        msg.setWindowTitle("Fine esami")
+        msg.setDetailedText("Ricorda di inserire il tuo nome nel box in alto a sinistra prima di chiudere.")
+        msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+        retval = msg.exec_()
 
 
     def magic(self):
+        """This function show the actual img"""
+        print(self.progress)
+        if self.progress<self.target:
 
-        self.header = self.study_headers[self.progress]
-        self.get_header_info(self.study_mean_MA[self.progress])
-        self.ui.img.data = self.studies[self.progress]
-        if self.progress == 0:  # if it's the first img set the width and the center to optimal values
-            self.ui.img.window_center = 40.
-            self.ui.img.window_width = 400.
-        self.setWindowTitle("IEO Dicom Viewer")
-        #self.file_list = imgs
-        self.ui.img.index = 0
-        self.ui.img.update_image()
+            self.header = self.study_headers[self.progress]
+            self.get_header_info(self.study_mean_MA[self.progress])
+            self.ui.img.data = self.studies[self.progress]
+            if self.progress == 0:  # if it's the first img set the width and the center to optimal values
+                self.ui.img.window_center = 40.
+                self.ui.img.window_width = 400.
+            self.setWindowTitle("IEO Dicom Viewer")
+            #self.file_list = imgs
+            self.ui.img.index = 0
+            self.ui.img.update_image()
+        else:
+            ##DIALOG
+            self.showdialog()
 
 
 
