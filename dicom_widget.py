@@ -3,7 +3,7 @@ from typing import Tuple
 from qtpy import QtWidgets, QtCore, QtGui
 
 from dicom_data import DicomData, AXIAL, ALLOWED_PLANES
-
+from skimage import transform as tf
 """Classi per tenere traccia delle posizioni del mouse sulla finestra"""
 
 
@@ -71,7 +71,7 @@ class DicomWidget(TrackingLabel):
 
         # Inner data
         self._zoom_level = kwargs.get("zoom_level", 0)
-        self._zoom_level=0.3
+        self._zoom_level=0
         self._data = kwargs.get("data", None)
         self._scaled_image = None
         self._low_hu = kwargs.get("low_hu", -1000)
@@ -175,6 +175,12 @@ class DicomWidget(TrackingLabel):
             data = (raw_data - self._low_hu) / self.window_width * 256
             data[data < 0] = 0
             data[data > 255] = 255
+
+            #interpolare qua
+
+            data = tf.resize(data, (768, 768, 1), order=1,anti_aliasing=True)
+
+
             data = data.astype("int8")
             self._image = QtGui.QImage(data, data.shape[1], data.shape[0], QtGui.QImage.Format_Indexed8)
             self._image.setColorTable(self._color_table)

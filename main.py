@@ -14,7 +14,6 @@ import pandas as pd
 from dicom_data import DicomData
 from ui.user_interface import Ui_MainWindow
 
-
 #altro progetto
 from dicom_widget import DicomWidget
 
@@ -76,14 +75,16 @@ class QDarkPalette(QPalette):
 
 
 #OVERALL VARIABLES
+debug=False
 
+if debug:
+    print(f"[WARNING] Running in DEBUG MODE!")
+    NEW_DIR=r"D:\FISICA MEDICA\MezzoDiContrasto\Immagini TEST MDC\NEW"
+    OLD_DIR=r"D:\FISICA MEDICA\MezzoDiContrasto\Immagini TEST MDC\OLD"
+else:
+    NEW_DIR=rNEW_DIR=r"\\portale.ieo.it\portale\Aree_Dipartimentali\G_RAD\2- G_RAD - ALTRE CARTELLE\MDC\NEW"
 
-#NEW_DIR=r"D:\FISICA MEDICA\MezzoDiContrasto\Immagini TEST MDC\NEW"
-#OLD_DIR=r"D:\FISICA MEDICA\MezzoDiContrasto\Immagini TEST MDC\OLD"
-
-NEW_DIR=rNEW_DIR=r"\\portale.ieo.it\portale\Aree_Dipartimentali\G_RAD\2- G_RAD - ALTRE CARTELLE\MDC\NEW"
-
-OLD_DIR=r"\\portale.ieo.it\portale\Aree_Dipartimentali\G_RAD\2- G_RAD - ALTRE CARTELLE\MDC\OLD"
+    OLD_DIR=r"\\portale.ieo.it\portale\Aree_Dipartimentali\G_RAD\2- G_RAD - ALTRE CARTELLE\MDC\OLD"
 
 class MainWindow(QMainWindow):
     def __init__(self):
