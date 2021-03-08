@@ -75,7 +75,7 @@ class QDarkPalette(QPalette):
 
 
 #OVERALL VARIABLES
-debug=True
+debug=False
 
 if debug:
     print(f"[WARNING] Running in DEBUG MODE!")
