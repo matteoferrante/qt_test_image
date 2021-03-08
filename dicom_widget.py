@@ -17,13 +17,11 @@ class TrackingLabel(QtWidgets.QLabel):
         #self.setGeometry(QtCore.QRect(400, 100, 1000, 1000)) #lavorare qua!
 
     def mouseLeaveEvent(self, event: QtGui.QMouseEvent):
-        print(f"[DEBUG] {self.parent()}")
         self.parent().mouse_x = -1
         self.parent().mouse_y = -1
         self.parent().update_coordinates()
 
     def mouseMoveEvent(self, event: QtGui.QMouseEvent):
-        print(f"[DEBUG] {self.parent()}")
         self.window.mouse_x = event.x()
         self.window.mouse_y = event.y()
         self.window.update_coordinates()
@@ -178,7 +176,7 @@ class DicomWidget(TrackingLabel):
 
             #interpolare qua
 
-            data = tf.resize(data, (768, 768, 1), order=1,anti_aliasing=True)
+            data = tf.resize(data, (660, 660, 1), order=1,anti_aliasing=True)
 
 
             data = data.astype("int8")

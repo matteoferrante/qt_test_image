@@ -75,7 +75,7 @@ class QDarkPalette(QPalette):
 
 
 #OVERALL VARIABLES
-debug=False
+debug=True
 
 if debug:
     print(f"[WARNING] Running in DEBUG MODE!")
@@ -97,6 +97,9 @@ class MainWindow(QMainWindow):
         self.collected_data=[]
         self.progress=0   #actual img
         self.target= 20  #img to evaluate
+        if debug:
+            self.target=5
+
 
 
         #self.ui.img = DicomWidget(self) #lavorare qua per piazzarlo
