@@ -160,6 +160,7 @@ class MainWindow(QMainWindow):
         """Save collected data on exit"""
 
         df=pd.DataFrame.from_dict(self.collected_data)
+        #df["CONTRASTO"]=self.contrast
         phys_name = self.ui.plainTextPhysSign.toPlainText()
 
         df.to_csv(os.path.join(r"\\portale.ieo.it\portale\Aree_Dipartimentali\G_RAD\2- G_RAD - ALTRE CARTELLE\MDC",f"collected_data_{phys_name}.csv"))
@@ -176,7 +177,7 @@ class MainWindow(QMainWindow):
         phys_name=self.ui.plainTextPhysSign.toPlainText()
         self.info["rate"]=rate
         self.info["Physician"]=phys_name
-        self.info.update({"contrast":self.contrast[self.progress]})
+        self.info["contrast"]=self.contrast[self.progress]
         self.collected_data.append(self.info)
 
         self.progress+=1
@@ -210,6 +211,7 @@ class MainWindow(QMainWindow):
 
     def load_at_start(self):
 
+        self.ui.pushButtonStart.setProperty("text","Attendi")
         #load all target images
         self.studies=[]
         self.study_headers=[]
@@ -233,11 +235,13 @@ class MainWindow(QMainWindow):
 
         ###SEPARATE THREAD APPROACH
 
+        self.wait_dialog()
         self.runAll()
         print("FINE", len(self.studies))
 
         print(f"[INFO] loading completed in {time.time()-start_time} s")
         self.ui.progressBar.setProperty("value", self.progress * 5)
+        self.ui.pushButtonStart.setVisible(False)
         self.ui.pushButtonStart.setEnabled(False)
         self.magic()
 
@@ -292,6 +296,15 @@ class MainWindow(QMainWindow):
         self.study_mean_MA.append(mean_mA)
         self.contrast.append(contrast_type)
 
+
+    def wait_dialog(self):
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Information)
+
+        msg.setText("Caricamento esami in corso, per favore aspetta qualche minuto, l'immagine compararirà automaticamente.")
+        msg.setWindowTitle("Caricamento")
+        msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+        retval = msg.exec_()
 
     def showdialog(self):
         msg = QMessageBox()
@@ -373,7 +386,6 @@ class MainWindow(QMainWindow):
         test=self.header
 
 
-        contrast_protocol=self.info["contrast_protocol"]
         info={
         "name": test.PatientName,
         "sex": test.PatientSex,
@@ -396,10 +408,9 @@ class MainWindow(QMainWindow):
         "kVp": float(test.KVP),
      #   "mA": float(test.XRayTubeCurrent),  # QUA CAMBIA PER OGNI FETTA, FORSE ACQUISIZIONE?
         "mA": mean_mA,
-        "contrast": test.ContrastBolusAgent,
+        "contrast_agent": test.ContrastBolusAgent,
         "filter_type": test.FilterType,
         "convKernel": test.ConvolutionKernel,
-        "contrast_protocol":contrast_protocol
         }
 
         self.info=info
