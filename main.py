@@ -1,10 +1,11 @@
 import glob
 import os
 import sys
+import traceback
 from random import randint
 
 from PyQt5 import QtGui
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QObject, pyqtSignal, pyqtSlot, QThreadPool, QRunnable, QEventLoop
 from PyQt5.QtGui import QPixmap, QCursor, QPalette, QColor
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QScrollArea, QMessageBox
 from PyQt5.uic.properties import QtCore, QtWidgets
@@ -16,7 +17,7 @@ from ui.user_interface import Ui_MainWindow
 
 #altro progetto
 from dicom_widget import DicomWidget
-
+import time
 
 
 
@@ -70,12 +71,32 @@ class QDarkPalette(QPalette):
         app.setPalette(self)
         self.set_stylesheet(app)
 
+#### MUTLITHREADING CLASSES
 
+
+
+
+
+class AWorker(QRunnable):
+    """ Generic Task for ThreadPool to execute required Kwargs =
+    target (<function>): function to call
+    args  (tuple): args for target
+    kwargs (dict): kwargs for target """
+    def __init__(self, target=None, args=(), kwargs={}):
+        super(AWorker, self).__init__()
+        self.target = target
+        self.args = args
+        self.kwargs = kwargs
+    def run(self):
+        self.target(*self.args, **self.kwargs)
 ### INIZIO CODICE
+
 
 
 #OVERALL VARIABLES
 debug=False
+
+start_time=time.time()
 
 if debug:
     print(f"[WARNING] Running in DEBUG MODE!")
@@ -87,6 +108,9 @@ else:
     OLD_DIR=r"\\portale.ieo.it\portale\Aree_Dipartimentali\G_RAD\2- G_RAD - ALTRE CARTELLE\MDC\OLD"
 
 class MainWindow(QMainWindow):
+
+
+    donesignal=pyqtSignal(tuple)
     def __init__(self):
         super(MainWindow, self).__init__()
         self.ui = Ui_MainWindow()
@@ -125,6 +149,9 @@ class MainWindow(QMainWindow):
         self.ui.pushButtonMedium.clicked.connect(lambda: self.vote(2))
         self.ui.pushButtonMax.clicked.connect(lambda: self.vote(3))
 
+        self.pool = QThreadPool.globalInstance()
+        self.pool.setMaxThreadCount(4)  # Use up to 8 threads
+
         #scroll_area = QtWidgets.QScrollArea()
         #scroll_area.setWidget(self.pix_label)
 
@@ -149,7 +176,9 @@ class MainWindow(QMainWindow):
         phys_name=self.ui.plainTextPhysSign.toPlainText()
         self.info["rate"]=rate
         self.info["Physician"]=phys_name
+        self.info.update({"contrast":self.contrast[self.progress]})
         self.collected_data.append(self.info)
+
         self.progress+=1
         self.ui.progressBar.setProperty("value", self.progress*5)
         self.magic()
@@ -180,28 +209,89 @@ class MainWindow(QMainWindow):
 
 
     def load_at_start(self):
+
         #load all target images
         self.studies=[]
         self.study_headers=[]
         self.study_mean_MA=[]
+        self.contrast=[]
+        self.patients=[]
         for i in range(self.target):  #three images for security
             print(f"[INFO] loading {i} of {self.target} images..")
-            self.ui.progressBar.setProperty("value", i* 5)
-            self._file_name = self.sample()
-            #     #list files
-            imgs = glob.glob(os.path.join(self._file_name, "*.dcm"))
-            #
-            try:
-                data, header, mean_mA = DicomData.from_files(imgs)
-                self.studies.append(data)
-                self.study_headers.append(header)
-                self.study_mean_MA.append(mean_mA)
-            except:
-                print("Could not load files")
 
+            self._file_name = self.sample()
+            self.patients.append(self._file_name)
+
+            #data,header,mean_mA=load_patient(self._file_name)
+
+
+
+            #self.studies.append(data)
+            #self.study_headers.append(header)
+            #self.study_mean_MA.append(mean_mA)
+
+
+        ###SEPARATE THREAD APPROACH
+
+        self.runAll()
+        print("FINE", len(self.studies))
+
+        print(f"[INFO] loading completed in {time.time()-start_time} s")
         self.ui.progressBar.setProperty("value", self.progress * 5)
         self.ui.pushButtonStart.setEnabled(False)
         self.magic()
+
+
+    def runAll(self):
+        self.eventloop = QEventLoop()
+        self.pool = QThreadPool.globalInstance()
+        self.pool.setMaxThreadCount(4)
+        self.donesignal.connect(self.add_patient)
+        for j in range(5):
+            for i in range(4):
+
+                worker = AWorker(target=self.load_patient, args=(self.patients[4*i+j],))
+                self.pool.start(worker)
+
+        self.pool.waitForDone()
+        self.eventloop.processEvents()
+        self.eventloop.exit()
+        # Now your data should have been appended to your list
+
+    def load_patient(self,path):
+
+        if "NEW" in path:
+            contrast_type="new"
+        elif "OLD" in path:
+            contrast_type="old"
+        imgs = glob.glob(os.path.join(path, "*.dcm"))
+        #
+
+        try:
+            data, header, mean_mA = DicomData.from_files(imgs)
+
+        except:
+            print("Could not load files")
+
+        #emitting output
+        #self.data.emit(data)
+        #self.header.emit(header)
+        #self.meanMa.emit(mean_mA)
+        self.donesignal.emit((data,header,mean_mA,contrast_type))
+        return data, header, mean_mA
+
+    def add_patient(self,data_tuple):
+
+        print(f"[INFO] adding patient..")
+        act=self.ui.progressBar.value()
+        self.ui.progressBar.setProperty("value",act+5)
+
+        data, header, mean_mA,contrast_type=data_tuple
+        self.studies.append(data)
+        self.study_headers.append(header)
+        self.study_mean_MA.append(mean_mA)
+        self.contrast.append(contrast_type)
+
 
     def showdialog(self):
         msg = QMessageBox()
@@ -281,12 +371,17 @@ class MainWindow(QMainWindow):
 
     def get_header_info(self,mean_mA):
         test=self.header
+
+
+        contrast_protocol=self.info["contrast_protocol"]
         info={
         "name": test.PatientName,
         "sex": test.PatientSex,
         "age": test.PatientAge,
         "birthday": test.PatientBirthDate,
         "patient_ID": test.PatientID,
+        "height": test.PatientSize,
+        "weight": test.PatientWeight,
 
         # study information
         "study_date": test.StudyDate,
@@ -303,7 +398,8 @@ class MainWindow(QMainWindow):
         "mA": mean_mA,
         "contrast": test.ContrastBolusAgent,
         "filter_type": test.FilterType,
-        "convKernel": test.ConvolutionKernel
+        "convKernel": test.ConvolutionKernel,
+        "contrast_protocol":contrast_protocol
         }
 
         self.info=info
