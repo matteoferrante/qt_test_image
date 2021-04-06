@@ -122,7 +122,7 @@ class MainWindow(QMainWindow):
         self.progress=0   #actual img
         self.target= 20  #img to evaluate
         if debug:
-            self.target=5
+            self.target=20
 
 
 
@@ -243,7 +243,7 @@ class MainWindow(QMainWindow):
         self.ui.progressBar.setProperty("value", self.progress * 5)
         self.ui.pushButtonStart.setVisible(False)
         self.ui.pushButtonStart.setEnabled(False)
-        self.magic()
+        #self.magic()
 
 
     def runAll(self):
@@ -264,6 +264,7 @@ class MainWindow(QMainWindow):
 
     def load_patient(self,path):
 
+        print("[INFO] Loading patient data..")
         if "NEW" in path:
             contrast_type="new"
         elif "OLD" in path:
@@ -282,11 +283,12 @@ class MainWindow(QMainWindow):
         #self.header.emit(header)
         #self.meanMa.emit(mean_mA)
         self.donesignal.emit((data,header,mean_mA,contrast_type))
+        self.add_patient((data,header,mean_mA,contrast_type))
         return data, header, mean_mA
 
     def add_patient(self,data_tuple):
 
-        print(f"[INFO] adding patient..")
+        print(f"[INFO] Adding patient..")
         act=self.ui.progressBar.value()
         self.ui.progressBar.setProperty("value",act+5)
 
@@ -295,6 +297,7 @@ class MainWindow(QMainWindow):
         self.study_headers.append(header)
         self.study_mean_MA.append(mean_mA)
         self.contrast.append(contrast_type)
+        self.magic()
 
 
     def wait_dialog(self):
@@ -320,17 +323,23 @@ class MainWindow(QMainWindow):
 
     def magic(self):
         """This function show the actual img"""
+
         print(self.progress)
         if self.progress<self.target:
 
             self.header = self.study_headers[self.progress]
             self.get_header_info(self.study_mean_MA[self.progress])
             self.ui.img.data = self.studies[self.progress]
+
+
             if self.progress == 0:  # if it's the first img set the width and the center to optimal values
                 self.ui.img.window_center = 40.
                 self.ui.img.window_width = 400.
-            self.setWindowTitle("IEO Dicom Viewer")
+
+
+            #self.setWindowTitle("IEO Dicom Viewer")
             #self.file_list = imgs
+
             self.ui.img.index = 0
             self.ui.img.update_image()
         else:
