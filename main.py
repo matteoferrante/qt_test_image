@@ -98,12 +98,13 @@ debug=False
 
 start_time=time.time()
 
+
 if debug:
     print(f"[WARNING] Running in DEBUG MODE!")
     NEW_DIR=r"D:\FISICA MEDICA\MezzoDiContrasto\Immagini TEST MDC\NEW"
     OLD_DIR=r"D:\FISICA MEDICA\MezzoDiContrasto\Immagini TEST MDC\OLD"
 else:
-    NEW_DIR=rNEW_DIR=r"\\portale.ieo.it\portale\Aree_Dipartimentali\G_RAD\2- G_RAD - ALTRE CARTELLE\MDC\NEW"
+    NEW_DIR=r"\\portale.ieo.it\portale\Aree_Dipartimentali\G_RAD\2- G_RAD - ALTRE CARTELLE\MDC\NEW"
 
     OLD_DIR=r"\\portale.ieo.it\portale\Aree_Dipartimentali\G_RAD\2- G_RAD - ALTRE CARTELLE\MDC\OLD"
 
@@ -130,17 +131,32 @@ class MainWindow(QMainWindow):
         self.ui.pushButtonStart.clicked.connect(lambda: self.load_at_start())
 
 
+        if debug:
+            ## Set the imgs
+            pix_not = QPixmap(r'ui\img_not_sufficient.png').scaled(50,
+                                                                                                                  50)
+            self.ui.labelInsufficientImg.setPixmap(pix_not)
+
+            pix_low = QPixmap(r'ui\img_low.png').scaled(50, 50)
+            self.ui.labelLowImg.setPixmap(pix_low)
+
+            pix_med = QPixmap(r'ui\img_medium.png').scaled(50, 50)
+            self.ui.labelMediumImg.setPixmap(pix_med)
+
+            pix_ok = QPixmap(r'ui\img_max.png').scaled(50, 50)
+            self.ui.labelMaxImg.setPixmap(pix_ok)
+
         ## Set the imgs
-        pix_not = QPixmap(r'ui/img_not_sufficient.png').scaled(50,50)
+        pix_not = QPixmap(r'C:\Users\IEO5572\PycharmProjects\qt_test_image\ui\img_not_sufficient.png').scaled(50,50)
         self.ui.labelInsufficientImg.setPixmap(pix_not)
 
-        pix_low = QPixmap(r'ui/img_low.png').scaled(50,50)
+        pix_low = QPixmap(r'C:\Users\IEO5572\PycharmProjects\qt_test_image\ui\img_low.png').scaled(50,50)
         self.ui.labelLowImg.setPixmap(pix_low)
 
-        pix_med = QPixmap(r'ui/img_medium.png').scaled(50, 50)
+        pix_med = QPixmap(r'C:\Users\IEO5572\PycharmProjects\qt_test_image\ui\img_medium.png').scaled(50, 50)
         self.ui.labelMediumImg.setPixmap(pix_med)
 
-        pix_ok = QPixmap(r'ui/img_max.png').scaled(50, 50)
+        pix_ok = QPixmap(r'C:\Users\IEO5572\PycharmProjects\qt_test_image\ui\img_max.png').scaled(50, 50)
         self.ui.labelMaxImg.setPixmap(pix_ok)
 
 
@@ -393,34 +409,49 @@ class MainWindow(QMainWindow):
 
     def get_header_info(self,mean_mA):
         test=self.header
+        info=None
+
+        try:
+            info={
+            "name": test.PatientName,
+            "sex": test.PatientSex,
+            "age": test.PatientAge,
+            "birthday": test.PatientBirthDate,
+            "patient_ID": test.PatientID,
+            "height": 0,
+            "weight": test.PatientWeight,
+
+            # study information
+            "study_date": test.StudyDate,
+            "study_time": test.StudyTime,
+            "study_id": test.StudyID,
+            "study_description": test.StudyDescription,
+            "series_description": test.SeriesDescription,
+            "model": test.ManufacturerModelName,
+            "protocol": test.ProtocolName,
+
+            # Other INFO
+            "kVp": float(test.KVP),
+         #   "mA": float(test.XRayTubeCurrent),  # QUA CAMBIA PER OGNI FETTA, FORSE ACQUISIZIONE?
+            "mA": mean_mA,
+            "contrast_agent": test.ContrastBolusAgent,
+            "filter_type": test.FilterType,
+            "convKernel": test.ConvolutionKernel,
+            }
+
+            try:
+                info["height"]: test.PatientSize
+            except:
+                print(f"[WARNING] Couldn't update PatientSize")
 
 
-        info={
-        "name": test.PatientName,
-        "sex": test.PatientSex,
-        "age": test.PatientAge,
-        "birthday": test.PatientBirthDate,
-        "patient_ID": test.PatientID,
-        "height": test.PatientSize,
-        "weight": test.PatientWeight,
+        except Exception as e:
+            print(e)
+            print(f"[INFO] An error occuered with {test.PatientName}. Saving your results")
+            self.close()
 
-        # study information
-        "study_date": test.StudyDate,
-        "study_time": test.StudyTime,
-        "study_id": test.StudyID,
-        "study_description": test.StudyDescription,
-        "series_description": test.SeriesDescription,
-        "model": test.ManufacturerModelName,
-        "protocol": test.ProtocolName,
 
-        # Other INFO
-        "kVp": float(test.KVP),
-     #   "mA": float(test.XRayTubeCurrent),  # QUA CAMBIA PER OGNI FETTA, FORSE ACQUISIZIONE?
-        "mA": mean_mA,
-        "contrast_agent": test.ContrastBolusAgent,
-        "filter_type": test.FilterType,
-        "convKernel": test.ConvolutionKernel,
-        }
+
 
         self.info=info
         return info
