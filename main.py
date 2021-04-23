@@ -419,7 +419,7 @@ class MainWindow(QMainWindow):
             "birthday": test.PatientBirthDate,
             "patient_ID": test.PatientID,
             "height": 0,
-            "weight": test.PatientWeight,
+            "weight": 0,
 
             # study information
             "study_date": test.StudyDate,
@@ -440,7 +440,8 @@ class MainWindow(QMainWindow):
             }
 
             try:
-                info["height"]: test.PatientSize
+                info["height"]=test.PatientSize
+                info["weight"]=test.PatientWeight
             except:
                 print(f"[WARNING] Couldn't update PatientSize")
 
